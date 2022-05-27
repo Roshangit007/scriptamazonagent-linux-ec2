@@ -1,0 +1,52 @@
+BLUE-GREEN-DEPLOYMENT-ON-EC2:
+
+Step1 : Create a IAM Role and attach policies
+S3 Full Access
+Auto scaling Full Access
+Code Deploy Full Access
+CodePipeline Full Access
+ 
+Step2 : Create template of EC2-instance 
+Step3:  Create Launch configuration with that Created AMI Template
+          In that config,
+Select AMI 
+Instance Type 
+Set EBS volume 
+Security groups
+In user data need to install agent in that instance 
+(This is for linux/centos/rhel)
+
+#!/bin/bash
+sudo yum update -y
+sudo yum install ruby -y
+sudo yum install wget -y
+cd /home/ec2-user
+wget https://aws-codedeploy-ap-south-1.s3.ap-south-1.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo service codedeploy-agent start
+
+# apache
+yum install httpd -y
+systemctl start httpd
+systemctl enable httpd
+
+Step4:  Create Auto Scaling group 
+Select launch configuration
+Select vpc and subnet
+Attach to an existing/new load balancer
+Set Group size
+
+
+
+Step5:  create codedeploy application:
+      In this we need to create application Group
+            -    And in this application group create a deployment group. :
+            -   Attach Service role
+           -   Select Deployment type (BlueGreen)
+	-   select Environment configuration (Automatically copy Amazon EC2  Auto Scaling group)
+             - select Deployment Configuration  (CodeDeploy AllAtonce)
+             - Select Application load balancer with Target Group
+
+Step 6 : Create A Pipeline With Source code and Deploy it.
+
